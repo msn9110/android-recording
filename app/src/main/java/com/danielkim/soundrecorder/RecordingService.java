@@ -32,6 +32,10 @@ import java.util.TimerTask;
  */
 public class RecordingService extends Service {
 
+    public interface StopListener {
+        void onFinishRecord(File file);
+    }
+
     private static final String LOG_TAG = "RecordingService";
 
     private String mFileName = null;
@@ -75,7 +79,9 @@ public class RecordingService extends Service {
     public void onDestroy() {
         if (mRecorder != null) {
             stopRecording();
-            Uri selectedUri = Uri.fromFile(new File(mFilePath));
+            File file = new File(mFilePath);
+
+            Uri selectedUri = Uri.fromFile(file);
             String fileExtension
                     = MimeTypeMap.getFileExtensionFromUrl(selectedUri.toString());
             String mimeType

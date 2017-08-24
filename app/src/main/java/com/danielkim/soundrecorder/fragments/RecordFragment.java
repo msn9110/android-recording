@@ -14,6 +14,7 @@ import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.danielkim.soundrecorder.FTPManager;
 import com.danielkim.soundrecorder.R;
 import com.danielkim.soundrecorder.RecordingService;
 import com.melnykov.fab.FloatingActionButton;
@@ -27,7 +28,7 @@ import java.io.File;
  * Use the {@link RecordFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RecordFragment extends Fragment {
+public class RecordFragment extends Fragment implements RecordingService.StopListener{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
     private static final String LOG_TAG = RecordFragment.class.getSimpleName();
@@ -160,6 +161,15 @@ public class RecordFragment extends Fragment {
             getActivity().stopService(intent);
             //allow the screen to turn off again once recording is finished
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            File dir = Environment.getExternalStoragePublicDirectory("SoundRecorder");
+            File[] files = dir.listFiles();
+            File f = files[0];
+            for (File tmp : files) {
+                if (tmp.lastModified() > f.lastModified()) {
+                    f = tmp;
+                }
+            }
+            //new FTPManager(getActivity(), f).execute();
         }
     }
 
@@ -180,5 +190,10 @@ public class RecordFragment extends Fragment {
             mChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenPaused);
             mChronometer.start();
         }
+    }
+
+    @Override
+    public void onFinishRecord(File file) {
+
     }
 }
