@@ -161,15 +161,6 @@ public class RecordFragment extends Fragment implements RecordingService.StopLis
             getActivity().stopService(intent);
             //allow the screen to turn off again once recording is finished
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            File dir = Environment.getExternalStoragePublicDirectory("SoundRecorder");
-            File[] files = dir.listFiles();
-            File f = files[0];
-            for (File tmp : files) {
-                if (tmp.lastModified() > f.lastModified()) {
-                    f = tmp;
-                }
-            }
-            //new FTPManager(getActivity(), f).execute();
         }
     }
 

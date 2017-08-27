@@ -27,9 +27,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by Daniel on 12/28/2014.
- */
+
 public class RecordingService extends Service {
 
     public interface StopListener {
@@ -43,7 +41,6 @@ public class RecordingService extends Service {
 
     private MediaRecorder mRecorder = null;
 
-    private DBHelper mDatabase;
 
     private long mStartingTimeMillis = 0;
     private long mElapsedMillis = 0;
@@ -66,7 +63,6 @@ public class RecordingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mDatabase = new DBHelper(getApplicationContext());
     }
 
     @Override
@@ -88,6 +84,8 @@ public class RecordingService extends Service {
                     = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
             System.out.println("## MIME : " + mimeType);
             MediaScannerConnection.scanFile(getApplicationContext(), new String[] {mFilePath}, null, null);
+            if (MySharedPreferences.getPrefFTPTransfer(getApplicationContext()))
+                new FTPManager(getApplicationContext(), file).execute();
         }
 
         super.onDestroy();
@@ -110,7 +108,7 @@ public class RecordingService extends Service {
         try {
             mRecorder.prepare();
             mRecorder.start();
-            mStartingTimeMillis = System.currentTimeMillis();
+
 
             //startTimer();
             //startForeground(1, createNotification());
@@ -121,19 +119,13 @@ public class RecordingService extends Service {
     }
 
     public void setFileNameAndPath(){
-        int count = 0;
+        mStartingTimeMillis = System.currentTimeMillis();
         File f;
+        mFileName = mStartingTimeMillis + ".mp4";
+        mFilePath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        mFilePath += "/SoundRecorder/" + mFileName;
 
-        do{
-            count++;
-
-            mFileName = getString(R.string.default_file_name)
-                    + "_" + (mDatabase.getCount() + count) + ".mp4";
-            mFilePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            mFilePath += "/SoundRecorder/" + mFileName;
-
-            f = new File(mFilePath);
-        }while (f.exists() && !f.isDirectory());
+        f = new File(mFilePath);
     }
 
     public void stopRecording() {
@@ -149,13 +141,6 @@ public class RecordingService extends Service {
         }
 
         mRecorder = null;
-
-        try {
-            mDatabase.addRecording(mFileName, mFilePath, mElapsedMillis);
-
-        } catch (Exception e){
-            Log.e(LOG_TAG, "exception", e);
-        }
     }
 
     private void startTimer() {

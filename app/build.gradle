@@ -29,5 +29,5 @@ dependencies {
     compile 'com.melnykov:floatingactionbutton:1.1.0'
     compile 'com.jpardogo.materialtabstrip:library:1.0.6'
     compile files('libs/commons-net-3.6.jar')
-    compile files('libs/commons-io-2.5.jar')
+    compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
 }

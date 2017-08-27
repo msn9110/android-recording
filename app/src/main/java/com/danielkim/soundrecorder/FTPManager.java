@@ -14,9 +14,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 
-/**
- * Created by HungShiung on 2017/8/1.
- */
 
 public class FTPManager extends AsyncTask<Void, Void, String> {
 
@@ -39,13 +36,16 @@ public class FTPManager extends AsyncTask<Void, Void, String> {
         String result = "上傳成功!!!";
         FTPClient ftpClient = new FTPClient();
         FileInputStream inputStream = null;
-        String ip = "1.34.132.90";
-        String username = "msn9110";
-        String password = "hhs#9110";
-        String remoteDir = "/MyRecordings/";
+        FTPSiteItem information = MySharedPreferences.getPrefFTPSiteItem(mContext);
+        if (information == null)
+            return "連線資訊未填妥";
+        String host = information.host;
+        String username = information.username;
+        String password = information.password;
+        String remoteDir = information.remoteDir;
         try {
             ftpClient.setConnectTimeout(60* 1000);
-            ftpClient.connect(InetAddress.getByName(ip));
+            ftpClient.connect(host);
             ftpClient.login(username, password);
             ftpClient.changeWorkingDirectory(remoteDir);
             inputStream = new FileInputStream(mFile);

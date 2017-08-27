@@ -4,6 +4,22 @@
         android:key="@string/pref_high_quality_key"
         android:title="@string/pref_high_quality_title"
         android:summary="@string/pref_high_quality_desc"/>
+    <CheckBoxPreference
+        android:key="@string/pref_ftp_transfer_key"
+        android:title="@string/pref_ftp_transfer_title"
+        android:summary="@string/pref_ftp_transfer_desc"/>
+    <EditTextPreference
+        android:key="@string/pref_ftp_host_key"
+        android:title="@string/pref_ftp_host_title"/>
+    <EditTextPreference
+        android:key="@string/pref_ftp_dir_key"
+        android:title="@string/pref_ftp_dir_title"/>
+    <EditTextPreference
+        android:key="@string/pref_ftp_user_key"
+        android:title="@string/pref_ftp_user_title"/>
+    <EditTextPreference
+        android:key="@string/pref_ftp_passwd_key"
+        android:title="@string/pref_ftp_passwd_title"/>
     <Preference
         android:key="@string/pref_about_key"
         android:title="@string/pref_about_title"
