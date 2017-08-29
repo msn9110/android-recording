@@ -68,4 +68,14 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="60dp" />
 
+    <EditText
+        android:id="@+id/content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="對應內容"
+        android:layout_marginTop="68dp"
+        android:layout_below="@+id/chronometer"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

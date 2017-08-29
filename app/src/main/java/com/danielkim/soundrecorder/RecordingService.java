@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -22,6 +23,7 @@ import com.danielkim.soundrecorder.activities.MainActivity;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Timer;
@@ -30,15 +32,14 @@ import java.util.TimerTask;
 
 public class RecordingService extends Service {
 
-    public interface StopListener {
-        void onFinishRecord(File file);
-    }
 
     private static final String LOG_TAG = "RecordingService";
 
     private String mFileName = null;
     private String mFilePath = null;
+    private String mContent;
 
+    private DBHelper mDatabase;
     private MediaRecorder mRecorder = null;
 
 
@@ -63,10 +64,12 @@ public class RecordingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mDatabase = new DBHelper(getApplicationContext());
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mContent = intent.getStringExtra("content");
         startRecording();
         return START_STICKY;
     }
@@ -84,8 +87,8 @@ public class RecordingService extends Service {
                     = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
             System.out.println("## MIME : " + mimeType);
             MediaScannerConnection.scanFile(getApplicationContext(), new String[] {mFilePath}, null, null);
-            if (MySharedPreferences.getPrefFTPTransfer(getApplicationContext()))
-                new FTPManager(getApplicationContext(), file).execute();
+            if (MySharedPreferences.getPrefFTPTransfer(getApplicationContext()) && mContent.length() > 0)
+                new FTPManager(getApplicationContext(), file, mContent).execute();
         }
 
         super.onDestroy();
@@ -132,6 +135,7 @@ public class RecordingService extends Service {
         mRecorder.stop();
         mElapsedMillis = (System.currentTimeMillis() - mStartingTimeMillis);
         mRecorder.release();
+        mDatabase.addRecording(mFileName, mFilePath, mElapsedMillis);
         Toast.makeText(this, getString(R.string.toast_recording_finish) + " " + mFilePath, Toast.LENGTH_LONG).show();
 
         //remove notification

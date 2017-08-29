@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +29,7 @@ import java.io.File;
  * Use the {@link RecordFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RecordFragment extends Fragment implements RecordingService.StopListener{
+public class RecordFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
     private static final String LOG_TAG = RecordFragment.class.getSimpleName();
@@ -37,6 +38,7 @@ public class RecordFragment extends Fragment implements RecordingService.StopLis
 
     //Recording controls
     private FloatingActionButton mRecordButton = null;
+    private EditText mText;
     private Button mPauseButton = null;
 
     private TextView mRecordingPrompt;
@@ -77,6 +79,7 @@ public class RecordFragment extends Fragment implements RecordingService.StopLis
                              Bundle savedInstanceState) {
         View recordView = inflater.inflate(R.layout.fragment_record, container, false);
 
+        mText = (EditText) recordView.findViewById(R.id.content);
         mChronometer = (Chronometer) recordView.findViewById(R.id.chronometer);
         //update recording prompt text
         mRecordingPrompt = (TextView) recordView.findViewById(R.id.recording_status_text);
@@ -110,8 +113,9 @@ public class RecordFragment extends Fragment implements RecordingService.StopLis
     private void onRecord(boolean start){
 
         Intent intent = new Intent(getActivity(), RecordingService.class);
-
         if (start) {
+            String content = mText.getText().toString();
+            intent.putExtra("content", content);
             // start recording
             mRecordButton.setImageResource(R.drawable.ic_media_stop);
             //mPauseButton.setVisibility(View.VISIBLE);
@@ -183,8 +187,4 @@ public class RecordFragment extends Fragment implements RecordingService.StopLis
         }
     }
 
-    @Override
-    public void onFinishRecord(File file) {
-
-    }
 }

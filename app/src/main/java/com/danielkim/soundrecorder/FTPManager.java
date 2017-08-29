@@ -8,27 +8,37 @@ import android.widget.Toast;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 
 public class FTPManager extends AsyncTask<Void, Void, String> {
 
     private Context mContext;
     private File mFile;
-    private ProgressDialog dialog;
+    private String mContent;
 
-    public FTPManager(Context context, File file) {
+    public FTPManager(Context context, File file, String content) {
         this.mContext = context;
         this.mFile = file;
-        dialog = new ProgressDialog(mContext);
-        dialog.setTitle("檔案上傳");
-        dialog.setMessage("請稍後");
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//        dialog.show();
+        this.mContent = content;
     }
 
     @Override
@@ -53,6 +63,32 @@ public class FTPManager extends AsyncTask<Void, Void, String> {
             ftpClient.setControlEncoding("GBK");
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.storeFile(mFile.getName(), inputStream);
+
+            String url = "http://1.34.132.90/recordings/insert.php";
+            String file_id = mFile.getName().replace(".mp4","");
+            ArrayList<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("file_id", file_id));
+            params.add(new BasicNameValuePair("content", mContent));
+
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+            HttpResponse httpResponse = httpClient.execute(httpPost);
+            HttpEntity httpEntity = httpResponse.getEntity();
+            InputStream is = httpEntity.getContent();
+
+            BufferedReader bufReader = new BufferedReader(new InputStreamReader(is, "utf-8"), 8);
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while((line = bufReader.readLine()) != null) {
+                builder.append(line + "\n");
+            }
+            inputStream.close();
+            JSONObject jsonData = new JSONObject(builder.toString());
+            int success = Integer.parseInt(jsonData.getString("success"));
+            if (success == 0)
+                result = "insert failed";
+
         } catch (Exception ex) {
             result = "連線異常";
             ex.printStackTrace();
@@ -70,7 +106,6 @@ public class FTPManager extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String s) {
-        dialog.dismiss();
         Toast.makeText(mContext, s, Toast.LENGTH_LONG).show();
     }
 }
